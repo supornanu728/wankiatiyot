@@ -81,7 +81,7 @@ app.post('/api/admin/bookings',adminGuard,(req,res)=>{
   const trp=+getSetting('travel_price');
   const qty=Math.max(1,+tickets||1);
   const hasTrv=travel?1:0;
-  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?)').run([name,phone||'',position||'',qty,hasTrv,tp*qty,hasTrv?trp:0]);
+  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?)').run([name,phone||'',position||'',qty,hasTrv,tp*qty,0]);
   res.json({id:r.lastInsertRowid});
 });
 
@@ -114,6 +114,13 @@ app.patch('/api/admin/bookings/:id',adminGuard,(req,res)=>{
 app.delete('/api/admin/bookings/:id',adminGuard,(req,res)=>{
   db.prepare('DELETE FROM bookings WHERE id=?').run([req.params.id]);
   res.json({ok:true});
+});
+
+// apply travel price to all bookings with travel=1
+app.post('/api/admin/apply-travel-price',adminGuard,(req,res)=>{
+  const trp=+getSetting('travel_price');
+  db.prepare('UPDATE bookings SET travel_price=? WHERE travel=1').run([trp]);
+  res.json({ok:true,price:trp});
 });
 
 // admin settings
