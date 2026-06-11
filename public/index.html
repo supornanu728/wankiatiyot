@@ -385,40 +385,56 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
     <div class="adm-tab" id="tab-adm">
       <div class="cgrid" id="adm-cgrid"></div>
 
-      <div style="text-align:right;margin-bottom:.5rem">
-        <button class="bxs del" onclick="admLogout()">🔓 ออกจากระบบ</button>
+      <!-- admin sub-nav -->
+      <div style="display:flex;gap:.5rem;margin:.8rem 0;flex-wrap:wrap">
+        <button class="nb on" id="asubnav-list" onclick="showAdmSub('list')">📋 จัดการ</button>
+        <button class="nb" id="asubnav-add" onclick="showAdmSub('add')">➕ เพิ่มรายชื่อ</button>
+        <button class="nb" id="asubnav-cfg" onclick="showAdmSub('cfg')">⚙️ ตั้งค่า</button>
+        <button class="bxs del" style="margin-left:auto" onclick="admLogout()">🔓 ออกจากระบบ</button>
       </div>
 
-      <div class="stitle">⚙️ ตั้งค่า</div>
-      <div class="sgrid">
-        <div class="fr"><label>ราคาบัตร (฿)</label><input type="text" id="s-tp"></div>
-        <div class="fr"><label>ค่าร่วมเดินทาง (฿)</label><input type="text" id="s-tr"></div>
-        <div class="fr"><label>PromptPay ID</label><input type="text" id="s-pp"></div>
-        <div class="fr"><label>ชื่อบัญชี</label><input type="text" id="s-an"></div>
-        <div class="fr"><label>ธนาคาร</label><input type="text" id="s-bk"></div>
-        <div class="fr"><label>เลขที่บัญชี</label><input type="text" id="s-ac"></div>
-      </div>
-      <div class="fr" style="margin-top:.6rem">
-        <label>รูป QR Code (อัปโหลดภาพ)</label>
-        <input type="file" id="s-qr-file" accept="image/*" onchange="previewQR(this)" style="font-size:.8rem">
-        <div id="s-qr-preview" style="margin-top:.5rem;display:none"><img id="s-qr-img" src="" style="max-width:160px;border-radius:8px;border:1px solid var(--border)"></div>
-      </div>
-      <button class="btn-s" onclick="saveCfg()">💾 บันทึกตั้งค่า</button>
-
-      <div class="stitle">➕ เพิ่มรายชื่อ</div>
-      <div class="addbox">
-        <div class="agrid">
-          <div class="fr"><label>ชื่อ-นามสกุล *</label><input type="text" id="a-n" placeholder="ชื่อ นามสกุล"></div>
-          <div class="fr"><label>ตำแหน่ง</label><input type="text" id="a-pos" placeholder="ตำแหน่ง/หน่วยงาน"></div>
-          <div class="fr"><label>ร่วมเดินทาง</label>
-            <select id="a-tr"><option value="0">ไม่ร่วม</option><option value="1">ร่วมเดินทาง</option></select>
-          </div>
+      <!-- sub: จัดการ -->
+      <div id="admsub-list">
+        <div class="fr" style="margin-bottom:.6rem">
+          <input type="text" id="adm-search" placeholder="🔍 ค้นหาชื่อ..." oninput="renderAdm()" style="width:100%">
         </div>
-        <button class="btn-s" onclick="admAdd()">➕ เพิ่มรายชื่อ</button>
+        <div id="adm-list"></div>
       </div>
 
-      <div class="stitle">📋 จัดการการชำระ</div>
-      <div id="adm-list"></div>
+      <!-- sub: เพิ่มรายชื่อ -->
+      <div id="admsub-add" style="display:none">
+        <div class="addbox">
+          <div class="agrid">
+            <div class="fr"><label>ชื่อ-นามสกุล *</label><input type="text" id="a-n" placeholder="ชื่อ นามสกุล"></div>
+            <div class="fr"><label>ตำแหน่ง</label><input type="text" id="a-pos" placeholder="ตำแหน่ง/หน่วยงาน"></div>
+            <div class="fr"><label>จำนวนบัตร</label>
+              <select id="a-t"><option value="1">1 ใบ</option><option value="2">2 ใบ</option><option value="3">3 ใบ</option><option value="4">4 ใบ</option><option value="5">5 ใบ</option></select>
+            </div>
+            <div class="fr"><label>ร่วมเดินทาง</label>
+              <select id="a-tr"><option value="0">ไม่ร่วม</option><option value="1">ร่วมเดินทาง</option></select>
+            </div>
+          </div>
+          <button class="btn-s" onclick="admAdd()">➕ เพิ่มรายชื่อ</button>
+        </div>
+      </div>
+
+      <!-- sub: ตั้งค่า -->
+      <div id="admsub-cfg" style="display:none">
+        <div class="sgrid">
+          <div class="fr"><label>ราคาบัตร (฿)</label><input type="text" id="s-tp"></div>
+          <div class="fr"><label>ค่าร่วมเดินทาง (฿)</label><input type="text" id="s-tr"></div>
+          <div class="fr"><label>PromptPay ID</label><input type="text" id="s-pp"></div>
+          <div class="fr"><label>ชื่อบัญชี</label><input type="text" id="s-an"></div>
+          <div class="fr"><label>ธนาคาร</label><input type="text" id="s-bk"></div>
+          <div class="fr"><label>เลขที่บัญชี</label><input type="text" id="s-ac"></div>
+        </div>
+        <div class="fr" style="margin-top:.6rem">
+          <label>รูป QR Code (อัปโหลดภาพ)</label>
+          <input type="file" id="s-qr-file" accept="image/*" onchange="previewQR(this)" style="font-size:.8rem">
+          <div id="s-qr-preview" style="margin-top:.5rem;display:none"><img id="s-qr-img" src="" style="max-width:160px;border-radius:8px;border:1px solid var(--border)"></div>
+        </div>
+        <button class="btn-s" onclick="saveCfg()">💾 บันทึกตั้งค่า</button>
+      </div>
     </div>
 
   </div>
@@ -608,6 +624,15 @@ function showAdm(){
   document.getElementById('tab-adm').classList.add('on');
   document.getElementById('nav-list').classList.remove('on');
   const ab=document.getElementById('nav-adm'); if(ab)ab.classList.add('on');
+  showAdmSub('list');
+}
+function showAdmSub(sub){
+  ['list','add','cfg'].forEach(s=>{
+    document.getElementById('admsub-'+s).style.display=s===sub?'block':'none';
+    const btn=document.getElementById('asubnav-'+s);
+    if(btn)btn.classList.toggle('on',s===sub);
+  });
+  if(sub==='cfg') loadAdmCfg();
 }
 function admLogout(){
   tok='';
@@ -668,8 +693,10 @@ async function loadAdmList(){
 }
 function renderAdm(){
   const el=document.getElementById('adm-list');
-  if(!admData.length){el.innerHTML='<div class="empty">ไม่มีรายการ</div>';return;}
-  el.innerHTML=admData.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'จ่ายแล้ว ✓':'ยังไม่จ่าย ✗'}</span>${b.travel?`<span class="pill ${b.travel_price>0?(b.paid_travel?'p-trv':'p-no'):'p-no'}" style="font-size:.66rem">${b.travel_price>0?(b.paid_travel?'ร่วมเดิน ✓':'ร่วมเดิน ✗'):'รอประกาศราคา'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ จ่ายค่าบัตรแล้ว':'⬜ ยังไม่จ่ายค่าบัตร'}</button>${b.travel&&b.travel_price>0?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ จ่ายค่าเดินทางแล้ว':'⬜ ยังไม่จ่ายค่าเดินทาง'}</button>`:b.travel?`<span style="font-size:.72rem;color:var(--muted);padding:.2rem .4rem">⏳ ยังไม่ประกาศราคาเดินทาง</span>`:''}<button class="bxs" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">🔳 QR บัตร</button>${b.travel&&b.travel_price>0?`<button class="bxs" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🔳 QR เดินทาง</button>`:''}<button class="bxs" onclick="openEdit(${b.id},${esc(b.name)},${esc(b.position||'')},${b.travel})">✏️</button><button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
+  const q=(document.getElementById('adm-search')||{}).value||'';
+  const filtered=q?admData.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())||(b.position||'').toLowerCase().includes(q.toLowerCase())):admData;
+  if(!filtered.length){el.innerHTML='<div class="empty">'+(q?'ไม่พบรายชื่อที่ค้นหา':'ไม่มีรายการ')+'</div>';return;}
+  el.innerHTML=filtered.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'จ่ายแล้ว ✓':'ยังไม่จ่าย ✗'}</span>${b.travel?`<span class="pill ${b.travel_price>0?(b.paid_travel?'p-trv':'p-no'):'p-no'}" style="font-size:.66rem">${b.travel_price>0?(b.paid_travel?'ร่วมเดิน ✓':'ร่วมเดิน ✗'):'รอประกาศราคา'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ จ่ายค่าบัตรแล้ว':'⬜ ยังไม่จ่ายค่าบัตร'}</button>${b.travel&&b.travel_price>0?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ จ่ายค่าเดินทางแล้ว':'⬜ ยังไม่จ่ายค่าเดินทาง'}</button>`:b.travel?`<span style="font-size:.72rem;color:var(--muted);padding:.2rem .4rem">⏳ ยังไม่ประกาศราคาเดินทาง</span>`:''}<button class="bxs" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">🔳 QR บัตร</button>${b.travel&&b.travel_price>0?`<button class="bxs" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🔳 QR เดินทาง</button>`:''}<button class="bxs" onclick="openEdit(${b.id},${esc(b.name)},${esc(b.position||'')},${b.travel})">✏️</button><button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
 }
 function openEdit(id,name,pos,travel){
   document.getElementById('edit-id').value=id;
@@ -699,8 +726,9 @@ async function admAdd(){
   const name=document.getElementById('a-n').value.trim();
   if(!name){showToast('กรุณากรอกชื่อ');return;}
   const position=document.getElementById('a-pos').value.trim();
-  const r=await fetch(API+'/api/admin/bookings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-password':tok},body:JSON.stringify({name,position,tickets:1,travel:+document.getElementById('a-tr').value})});
-  if(r.ok){showToast('✅ เพิ่มแล้ว');document.getElementById('a-n').value='';document.getElementById('a-pos').value='';await loadAdmData();await loadList();}
+  const tickets=+document.getElementById('a-t').value||1;
+  const r=await fetch(API+'/api/admin/bookings',{method:'POST',headers:{'Content-Type':'application/json','x-admin-password':tok},body:JSON.stringify({name,position,tickets,travel:+document.getElementById('a-tr').value})});
+  if(r.ok){showToast('✅ เพิ่มแล้ว');document.getElementById('a-n').value='';document.getElementById('a-pos').value='';document.getElementById('a-t').value='1';await loadAdmData();await loadList();}
 }
 
 function fmtDate(dt){return new Date(dt).toLocaleDateString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
