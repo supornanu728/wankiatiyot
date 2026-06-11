@@ -22,14 +22,14 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    phone TEXT NOT NULL DEFAULT '',
-    position TEXT NOT NULL DEFAULT '',
-    tickets INTEGER NOT NULL DEFAULT 1,
-    travel INTEGER NOT NULL DEFAULT 0,
-    ticket_price INTEGER NOT NULL DEFAULT 1000,
-    travel_price INTEGER NOT NULL DEFAULT 0,
-    paid_ticket INTEGER NOT NULL DEFAULT 0,
-    paid_travel INTEGER NOT NULL DEFAULT 0,
+    phone TEXT DEFAULT '',
+    position TEXT DEFAULT '',
+    tickets INTEGER DEFAULT 1,
+    travel INTEGER DEFAULT 0,
+    ticket_price INTEGER DEFAULT 1000,
+    travel_price INTEGER DEFAULT 0,
+    paid_ticket INTEGER DEFAULT 0,
+    paid_travel INTEGER DEFAULT 0,
     note TEXT DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
