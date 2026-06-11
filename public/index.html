@@ -424,6 +424,21 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
   </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="sov" id="edit-ov" onclick="if(event.target===this)closeEdit()">
+  <div class="sbox" style="min-width:300px">
+    <button class="sclose" onclick="closeEdit()">✕</button>
+    <div class="stit" style="margin-bottom:1rem">✏️ แก้ไขข้อมูล</div>
+    <input type="hidden" id="edit-id">
+    <div class="fr"><label>ชื่อ-นามสกุล *</label><input type="text" id="edit-name"></div>
+    <div class="fr" style="margin-top:.6rem"><label>ตำแหน่ง</label><input type="text" id="edit-pos"></div>
+    <div class="fr" style="margin-top:.6rem"><label>ร่วมเดินทาง</label>
+      <select id="edit-tr"><option value="0">ไม่ร่วม</option><option value="1">ร่วมเดินทาง</option></select>
+    </div>
+    <button class="btn-p" style="margin-top:1rem;width:100%" onclick="saveEdit()">💾 บันทึก</button>
+  </div>
+</div>
+
 <!-- QR MODAL -->
 <div class="ov" id="qr-ov" onclick="if(event.target===this)closeQR()">
   <div class="modal">
@@ -652,7 +667,22 @@ async function loadAdmList(){
 function renderAdm(){
   const el=document.getElementById('adm-list');
   if(!admData.length){el.innerHTML='<div class="empty">ไม่มีรายการ</div>';return;}
-  el.innerHTML=admData.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'บัตร ✓':'บัตร ✗'}</span>${b.travel?`<span class="pill ${b.paid_travel?'p-trv':'p-no'}" style="font-size:.66rem">${b.paid_travel?'เดิน ✓':'เดิน ✗'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ บัตรจ่าย':'⬜ บัตรค้าง'}</button>${b.travel?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ เดินจ่าย':'⬜ เดินค้าง'}</button>`:''}<button class="bxs" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">🔳 QR</button>${b.travel?`<button class="bxs" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🔳 เดิน</button>`:''}<button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
+  el.innerHTML=admData.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'จ่ายแล้ว ✓':'ยังไม่จ่าย ✗'}</span>${b.travel?`<span class="pill ${b.travel_price>0?(b.paid_travel?'p-trv':'p-no'):'p-no'}" style="font-size:.66rem">${b.travel_price>0?(b.paid_travel?'ร่วมเดิน ✓':'ร่วมเดิน ✗'):'รอประกาศราคา'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ จ่ายค่าบัตรแล้ว':'⬜ ยังไม่จ่ายค่าบัตร'}</button>${b.travel&&b.travel_price>0?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ จ่ายค่าเดินทางแล้ว':'⬜ ยังไม่จ่ายค่าเดินทาง'}</button>`:b.travel?`<span style="font-size:.72rem;color:var(--muted);padding:.2rem .4rem">⏳ ยังไม่ประกาศราคาเดินทาง</span>`:''}<button class="bxs" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">🔳 QR บัตร</button>${b.travel&&b.travel_price>0?`<button class="bxs" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🔳 QR เดินทาง</button>`:''}<button class="bxs" onclick="openEdit(${b.id},${esc(b.name)},${esc(b.position||'')},${b.travel})">✏️</button><button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
+}
+function openEdit(id,name,pos,travel){
+  document.getElementById('edit-id').value=id;
+  document.getElementById('edit-name').value=name;
+  document.getElementById('edit-pos').value=pos;
+  document.getElementById('edit-tr').value=travel;
+  document.getElementById('edit-ov').classList.add('open');
+}
+function closeEdit(){document.getElementById('edit-ov').classList.remove('open');}
+async function saveEdit(){
+  const id=document.getElementById('edit-id').value;
+  const name=document.getElementById('edit-name').value.trim();
+  if(!name){showToast('กรุณากรอกชื่อ');return;}
+  const r=await fetch(API+'/api/admin/bookings/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-password':tok},body:JSON.stringify({name,position:document.getElementById('edit-pos').value,travel:+document.getElementById('edit-tr').value})});
+  if(r.ok){showToast('✅ แก้ไขแล้ว');closeEdit();await loadAdmData();await loadList();}
 }
 async function tog(id,field,cur){
   await fetch(API+'/api/admin/bookings/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-password':tok},body:JSON.stringify({[field]:cur?0:1})});
