@@ -325,6 +325,68 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
 }
 .w-btn:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(26,110,224,.48);}
 .w-btn:active{transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  /* body scroll บนมือถือ */
+  html,body{height:auto;overflow-y:auto;}
+  .site{height:auto;min-height:100vh;overflow:visible;}
+  .main{overflow-y:visible;padding:.6rem .75rem 2rem;}
+
+  /* header */
+  .info-card{padding:.5rem 1rem .6rem;width:95%;}
+  .ic-title{font-size:1.2rem;}
+
+  /* chart cards */
+  .cnum{font-size:1.4rem;}
+  .clbl{font-size:.58rem;}
+
+  /* รายชื่อ */
+  .lhead{gap:.3rem;}
+  .lhead .bxs{font-size:.7rem;padding:.22rem .55rem;}
+  .cn{font-size:.86rem;}
+  .bpills{gap:.28rem;}
+  .pill{font-size:.65rem;padding:.18rem .55rem;}
+
+  /* bcard btop บนหน้าจอเล็ก */
+  .btop{flex-wrap:wrap;gap:.4rem;}
+  .pr{width:100%;text-align:left;display:flex;gap:.6rem;align-items:baseline;}
+
+  /* admin cards */
+  .acard{padding:.7rem .8rem;}
+  .ac-name{font-size:.85rem;}
+  .ac-btns{gap:.25rem;}
+  .ac-btns .bxs{font-size:.7rem;padding:.22rem .55rem;}
+  .ac-top{gap:.4rem;}
+
+  /* admin sub-nav */
+  #tab-adm>div:nth-child(2){flex-wrap:wrap;gap:.35rem;}
+  #tab-adm>div:nth-child(2) .bxs{margin-left:0!important;}
+
+  /* modal */
+  .modal{max-width:100%;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;}
+  .ov{align-items:flex-end;padding:0;}
+  .sbox{max-width:100%;width:95%;border-radius:18px 18px 0 0;}
+  .sov{align-items:flex-end;}
+
+  /* ตั้งค่า */
+  .sgrid{grid-template-columns:1fr;}
+  .agrid{grid-template-columns:1fr;}
+
+  /* search */
+  #pub-search,#adm-search{font-size:.88rem;}
+
+  /* nav */
+  .nb{font-size:.8rem;padding:.38rem .85rem;}
+}
+
+@media(min-width:768px){
+  /* desktop: ขยาย max-width */
+  .main{max-width:900px;padding:1rem 1.5rem 2rem;}
+  .acard{padding:1rem 1.2rem;}
+  .ac-btns .bxs{font-size:.78rem;padding:.3rem .8rem;}
+  .sgrid{grid-template-columns:repeat(3,1fr);}
+}
 </style>
 </head>
 <body>
