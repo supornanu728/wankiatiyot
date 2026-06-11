@@ -87,13 +87,19 @@ app.post('/api/admin/bookings',adminGuard,(req,res)=>{
 
 // admin patch paid status
 app.patch('/api/admin/bookings/:id',adminGuard,(req,res)=>{
-  const {paid_ticket,paid_travel,note,name,position,travel}=req.body;
+  const {paid_ticket,paid_travel,note,name,position,tickets,travel}=req.body;
   const fields=[]; const vals=[];
   if(paid_ticket!==undefined){fields.push('paid_ticket=?');vals.push(paid_ticket?1:0);}
   if(paid_travel!==undefined){fields.push('paid_travel=?');vals.push(paid_travel?1:0);}
   if(note!==undefined){fields.push('note=?');vals.push(note);}
   if(name!==undefined){fields.push('name=?');vals.push(name);}
   if(position!==undefined){fields.push('position=?');vals.push(position);}
+  if(tickets!==undefined){
+    const qty=Math.max(1,+tickets||1);
+    const tp=+getSetting('ticket_price');
+    fields.push('tickets=?','ticket_price=?');
+    vals.push(qty,tp*qty);
+  }
   if(travel!==undefined){
     const hasTrv=travel?1:0;
     const trp=hasTrv?+getSetting('travel_price'):0;
