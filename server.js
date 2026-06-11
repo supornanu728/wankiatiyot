@@ -42,9 +42,9 @@ const defaults = [
   ['account_name',''],['bank_name',''],['account_no',''],['max_tickets','10'],['qr_image',''],
 ];
 const ins = db.prepare('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)');
-for (const [k,v] of defaults) ins.run(k,v);
+for (const [k,v] of defaults) ins.run([k,v]);
 
-function getSetting(key){ const r=db.prepare('SELECT value FROM settings WHERE key=?').get(key); return r?r.value:null; }
+function getSetting(key){ const r=db.prepare('SELECT value FROM settings WHERE key=?').get([key]); return r?r.value:null; }
 
 function adminGuard(req,res,next){
   if(req.headers['x-admin-password']!==ADMIN_PASSWORD) return res.status(401).json({error:'Unauthorized'});
@@ -81,7 +81,7 @@ app.post('/api/admin/bookings',adminGuard,(req,res)=>{
   const trp=+getSetting('travel_price');
   const qty=Math.max(1,+tickets||1);
   const hasTrv=travel?1:0;
-  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?)').run(name,phone||'',position||'',qty,hasTrv,tp*qty,hasTrv?trp:0);
+  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?)').run([name,phone||'',position||'',qty,hasTrv,tp*qty,hasTrv?trp:0]);
   res.json({id:r.lastInsertRowid});
 });
 
@@ -92,13 +92,13 @@ app.patch('/api/admin/bookings/:id',adminGuard,(req,res)=>{
   if(paid_ticket!==undefined){fields.push('paid_ticket=?');vals.push(paid_ticket?1:0);}
   if(paid_travel!==undefined){fields.push('paid_travel=?');vals.push(paid_travel?1:0);}
   if(note!==undefined){fields.push('note=?');vals.push(note);}
-  if(fields.length) db.prepare(`UPDATE bookings SET ${fields.join(',')} WHERE id=?`).run(...vals,req.params.id);
+  if(fields.length) db.prepare(`UPDATE bookings SET ${fields.join(',')} WHERE id=?`).run([...vals,req.params.id]);
   res.json({ok:true});
 });
 
 // admin delete
 app.delete('/api/admin/bookings/:id',adminGuard,(req,res)=>{
-  db.prepare('DELETE FROM bookings WHERE id=?').run(req.params.id);
+  db.prepare('DELETE FROM bookings WHERE id=?').run([req.params.id]);
   res.json({ok:true});
 });
 
@@ -106,7 +106,7 @@ app.delete('/api/admin/bookings/:id',adminGuard,(req,res)=>{
 app.put('/api/admin/settings',adminGuard,(req,res)=>{
   const allowed=['ticket_price','travel_price','event_name','event_date','event_venue','promptpay_id','max_tickets','account_name','bank_name','account_no','qr_image'];
   const u=db.prepare('UPDATE settings SET value=? WHERE key=?');
-  for(const k of allowed) if(req.body[k]!==undefined) u.run(String(req.body[k]),k);
+  for(const k of allowed) if(req.body[k]!==undefined) u.run([String(req.body[k]),k]);
   res.json({ok:true});
 });
 
