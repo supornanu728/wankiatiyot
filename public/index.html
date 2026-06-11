@@ -529,13 +529,15 @@ async function loadList(){
         ?`<span class="pill p-ok">✅ ค่าบัตร จ่ายแล้ว</span>`
         :`<span class="pill p-no" onclick="openQR(event,${esc(b.name)},${b.ticket_price},'ค่าบัตร')">💳 ค่าบัตร ยังไม่จ่าย</span>`;
       const trp=b.travel
-        ?(b.paid_travel
-          ?`<span class="pill p-trv">🚌 ร่วมเดินทาง จ่ายแล้ว</span>`
-          :`<span class="pill p-no" onclick="openQR(event,${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🚌 ค่าเดินทาง ยังไม่จ่าย</span>`)
-        :`<span class="pill p-nil">ไม่ร่วมเดินทาง</span>`;
+        ?(b.travel_price>0
+          ?(b.paid_travel
+            ?`<span class="pill p-trv">🚌 ร่วมเดินทาง จ่ายแล้ว</span>`
+            :`<span class="pill p-no" onclick="openQR(event,${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">🚌 ค่าเดินทาง ยังไม่จ่าย</span>`)
+          :`<span class="pill p-nil">🚌 รอประกาศราคาเดินทาง</span>`)
+        :``;
       return `<div class="bcard">
         <div class="btop">
-          <div class="av">${esc1(b.name)}</div>
+          <div class="av" style="font-size:.85rem;font-weight:700">${b.tickets}</div>
           <div class="ci">
             <div class="cn">${esc2(b.name)}</div>
             <div class="cm">🎫 ${b.tickets} ใบ · ${fmtDate(b.created_at)}</div>
