@@ -60,7 +60,7 @@ app.get('/api/settings',(req,res)=>{
 
 // public bookings
 app.get('/api/bookings',(req,res)=>{
-  res.json(db.prepare('SELECT id,name,tickets,travel,ticket_price,travel_price,paid_ticket,paid_travel,created_at FROM bookings ORDER BY created_at DESC').all());
+  res.json(db.prepare('SELECT id,name,tickets,COALESCE(travel,0) travel,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,created_at FROM bookings ORDER BY created_at DESC').all());
 });
 
 // admin login
@@ -70,7 +70,7 @@ app.post('/api/admin/login',(req,res)=>{
 
 // admin get all
 app.get('/api/admin/bookings',adminGuard,(req,res)=>{
-  res.json(db.prepare('SELECT * FROM bookings ORDER BY created_at DESC').all());
+  res.json(db.prepare('SELECT id,name,phone,position,tickets,COALESCE(travel,0) travel,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,note,created_at FROM bookings ORDER BY created_at DESC').all());
 });
 
 // admin add
