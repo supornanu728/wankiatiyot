@@ -26,6 +26,7 @@ db.exec(`
     position TEXT DEFAULT '',
     tickets INTEGER DEFAULT 1,
     travel INTEGER DEFAULT 0,
+    travel_count INTEGER DEFAULT 1,
     ticket_price INTEGER DEFAULT 1000,
     travel_price INTEGER DEFAULT 0,
     paid_ticket INTEGER DEFAULT 0,
@@ -60,7 +61,7 @@ app.get('/api/settings',(req,res)=>{
 
 // public bookings
 app.get('/api/bookings',(req,res)=>{
-  res.json(db.prepare('SELECT id,name,tickets,COALESCE(travel,0) travel,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,created_at FROM bookings ORDER BY created_at DESC').all());
+  res.json(db.prepare('SELECT id,name,position,tickets,COALESCE(travel,0) travel,COALESCE(travel_count,1) travel_count,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,created_at FROM bookings ORDER BY created_at DESC').all());
 });
 
 // admin login
@@ -70,24 +71,24 @@ app.post('/api/admin/login',(req,res)=>{
 
 // admin get all
 app.get('/api/admin/bookings',adminGuard,(req,res)=>{
-  res.json(db.prepare('SELECT id,name,phone,position,tickets,COALESCE(travel,0) travel,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,note,created_at FROM bookings ORDER BY created_at DESC').all());
+  res.json(db.prepare('SELECT id,name,phone,position,tickets,COALESCE(travel,0) travel,COALESCE(travel_count,1) travel_count,COALESCE(ticket_price,0) ticket_price,COALESCE(travel_price,0) travel_price,COALESCE(paid_ticket,0) paid_ticket,COALESCE(paid_travel,0) paid_travel,note,created_at FROM bookings ORDER BY created_at DESC').all());
 });
 
 // admin add
 app.post('/api/admin/bookings',adminGuard,(req,res)=>{
-  const {name,phone,position,tickets,travel}=req.body;
+  const {name,phone,position,tickets,travel,travel_count}=req.body;
   if(!name) return res.status(400).json({error:'ต้องมีชื่อ'});
   const tp=+getSetting('ticket_price');
-  const trp=+getSetting('travel_price');
   const qty=Math.max(1,+tickets||1);
   const hasTrv=travel?1:0;
-  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?)').run([name,phone||'',position||'',qty,hasTrv,tp*qty,0]);
+  const tc=hasTrv?Math.max(1,+travel_count||1):0;
+  const r=db.prepare('INSERT INTO bookings (name,phone,position,tickets,travel,travel_count,ticket_price,travel_price) VALUES (?,?,?,?,?,?,?,?)').run([name,phone||'',position||'',qty,hasTrv,tc,tp*qty,0]);
   res.json({id:r.lastInsertRowid});
 });
 
 // admin patch paid status
 app.patch('/api/admin/bookings/:id',adminGuard,(req,res)=>{
-  const {paid_ticket,paid_travel,note,name,position,tickets,travel}=req.body;
+  const {paid_ticket,paid_travel,note,name,position,tickets,travel,travel_count}=req.body;
   const fields=[]; const vals=[];
   if(paid_ticket!==undefined){fields.push('paid_ticket=?');vals.push(paid_ticket?1:0);}
   if(paid_travel!==undefined){fields.push('paid_travel=?');vals.push(paid_travel?1:0);}
@@ -103,8 +104,12 @@ app.patch('/api/admin/bookings/:id',adminGuard,(req,res)=>{
   if(travel!==undefined){
     const hasTrv=travel?1:0;
     const trp=hasTrv?+getSetting('travel_price'):0;
-    fields.push('travel=?','travel_price=?');
-    vals.push(hasTrv,trp);
+    const tc=hasTrv?Math.max(1,+travel_count||1):0;
+    fields.push('travel=?','travel_price=?','travel_count=?');
+    vals.push(hasTrv,trp,tc);
+  } else if(travel_count!==undefined){
+    fields.push('travel_count=?');
+    vals.push(Math.max(1,+travel_count||1));
   }
   if(fields.length) db.prepare(`UPDATE bookings SET ${fields.join(',')} WHERE id=?`).run([...vals,req.params.id]);
   res.json({ok:true});
