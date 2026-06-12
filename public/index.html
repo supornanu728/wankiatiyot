@@ -108,7 +108,10 @@ html,body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--whit
 }
 
 /* ── CHART CARDS ── */
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:.75rem;}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem;}
+.cck::after{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.cck .cnum{color:#fbbf24;}
+.cck .cbar{background:linear-gradient(90deg,#f59e0b,#fcd34d);}
 .cc{
   background:var(--card);border:1px solid var(--border);
   border-radius:12px;padding:.65rem .45rem .55rem;
@@ -130,7 +133,7 @@ html,body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--whit
 .ccp .cbar{background:linear-gradient(90deg,var(--ok-c),#22d3a0);}
 .cct .cbar{background:linear-gradient(90deg,var(--trv-c),#a855f7);}
 .cpct{font-size:.6rem;color:var(--muted);margin-top:.25rem;}
-@media(max-width:440px){.cgrid{gap:.4rem;}.clbl{font-size:.58rem;}}
+@media(max-width:600px){.cgrid{grid-template-columns:repeat(2,1fr);gap:.4rem;}.clbl{font-size:.62rem;}.cnum{font-size:clamp(1.3rem,5vw,1.8rem);}}
 
 /* ── LEGEND ── */
 .legend{display:flex;gap:.35rem .8rem;margin-bottom:.55rem;font-size:.7rem;color:var(--muted);flex-wrap:wrap;}
@@ -423,6 +426,7 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
     <div class="info-card" id="info-card">
       <div class="ic-stats" id="ic-stats">
         <div class="ic-stat"><strong id="st-total">0</strong> คนทั้งหมด</div>
+        <div class="ic-stat"><strong id="st-tickets" style="color:#fbbf24">0</strong> บัตรรวม</div>
         <div class="ic-stat"><strong id="st-paid" style="color:var(--ok-c)">0</strong> จ่ายแล้ว</div>
         <div class="ic-stat"><strong id="st-travel" style="color:var(--trv-c)">0</strong> ร่วมเดินทาง</div>
       </div>
@@ -440,7 +444,8 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
     <!-- LIST TAB -->
     <div id="tab-list">
       <div class="cgrid">
-        <div class="cc ccb"><div class="cnum" id="c-total">0</div><div class="clbl">ทั้งหมด</div><div class="cbarw"><div class="cbar" style="width:100%"></div></div><div class="cpct"> </div></div>
+        <div class="cc ccb"><div class="cnum" id="c-total">0</div><div class="clbl">คนทั้งหมด</div><div class="cbarw"><div class="cbar" style="width:100%"></div></div><div class="cpct"> </div></div>
+        <div class="cc cck"><div class="cnum" id="c-tickets">0</div><div class="clbl">บัตรรวมทั้งหมด</div><div class="cbarw"><div class="cbar" style="width:100%"></div></div><div class="cpct" id="ck-unit">ใบ</div></div>
         <div class="cc ccp"><div class="cnum" id="c-paid">0</div><div class="clbl">จ่ายค่าบัตรแล้ว</div><div class="cbarw"><div class="cbar" id="cb-paid" style="width:0%"></div></div><div class="cpct" id="cp-paid">0%</div></div>
         <div class="cc cct"><div class="cnum" id="c-travel">0</div><div class="clbl">ร่วมเดินทาง</div><div class="cbarw"><div class="cbar" id="cb-travel" style="width:0%"></div></div><div class="cpct" id="cp-travel">0%</div></div>
       </div>
@@ -649,12 +654,15 @@ async function loadList(){
     const r=await fetch(API+'/api/bookings');
     pubData=await r.json();
     const total=pubData.length;
+    const tickets=pubData.reduce((s,b)=>s+(+b.tickets||1),0);
     const paid=pubData.filter(b=>b.paid_ticket).length;
     const travel=pubData.filter(b=>b.travel).reduce((s,b)=>s+(+b.travel_count||1),0);
     document.getElementById('st-total').textContent=total;
+    document.getElementById('st-tickets').textContent=tickets;
     document.getElementById('st-paid').textContent=paid;
     document.getElementById('st-travel').textContent=travel;
     document.getElementById('c-total').textContent=total;
+    document.getElementById('c-tickets').textContent=tickets;
     document.getElementById('c-paid').textContent=paid;
     document.getElementById('c-travel').textContent=travel;
     const pp=total?Math.round(paid/total*100):0;
