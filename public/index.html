@@ -931,7 +931,7 @@ async function admAdd(){
 
 function fmtDate(dt){return new Date(dt).toLocaleDateString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
 
-function downloadPDF(){
+async function downloadPDF(){
   const sorted=[...pubData].sort((a,b)=>a.name.localeCompare(b.name,'th'));
   const total=sorted.length;
   const totalTickets=sorted.reduce((s,b)=>s+(+b.tickets||1),0);
@@ -1000,13 +1000,19 @@ function downloadPDF(){
         </tfoot>
       </table>
     </div>`;
+  // ใส่ใน DOM จริงก่อนเพื่อให้ browser โหลด font
+  el.style.cssText='position:fixed;left:-9999px;top:0;z-index:-1';
+  document.body.appendChild(el);
+  // รอ font โหลดเสร็จ
+  await document.fonts.load('700 16px Sarabun');
+  await document.fonts.ready;
   html2pdf().set({
     margin:[8,8,8,8],
     filename:`รายชื่อวันเกียรติยศ_${new Date().toLocaleDateString('th-TH')}.pdf`,
     image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,logging:false},
+    html2canvas:{scale:2,useCORS:true,logging:false,allowTaint:true},
     jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
-  }).from(el).save();
+  }).from(el).save().then(()=>document.body.removeChild(el));
 }
 function esc(s){return JSON.stringify(String(s));}
 function esc1(s){return(String(s).charAt(0)||'?').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
