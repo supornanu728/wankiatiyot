@@ -649,7 +649,7 @@ async function loadList(){
     pubData=await r.json();
     const total=pubData.length;
     const paid=pubData.filter(b=>b.paid_ticket).length;
-    const travel=pubData.filter(b=>b.travel).length;
+    const travel=pubData.filter(b=>b.travel).reduce((s,b)=>s+(+b.travel_count||1),0);
     document.getElementById('st-total').textContent=total;
     document.getElementById('st-paid').textContent=paid;
     document.getElementById('st-travel').textContent=travel;
