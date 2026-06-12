@@ -575,7 +575,7 @@ label{font-size:.76rem;color:var(--muted);display:block;margin-bottom:.3rem;}
 
 <script>
 const API='';
-let cfg={}, tok='', admData=[], pubData=[];
+let cfg={}, tok='', admData=[], pubData=[], _pd={};
 
 async function init(){
   await loadCfg();
@@ -620,7 +620,9 @@ function renderList(){
   list.sort((a,b)=>a.name.localeCompare(b.name,'th'));
   const el=document.getElementById('pub-list');
   if(!list.length){el.innerHTML='<div class="empty">'+(q?'ไม่พบรายชื่อที่ค้นหา':'ยังไม่มีรายการ')+'</div>';return;}
+  _pd={};
   el.innerHTML=list.map(b=>{
+    _pd[b.id]=b;
     const canPayTicket=!b.paid_ticket && b.ticket_price>0;
     const canPayTravel=b.travel && !b.paid_travel && b.travel_price>0;
     const tp2=b.paid_ticket
@@ -633,27 +635,14 @@ function renderList(){
           :`<span class="pill p-no">🚌 ค่าเดินทาง ยังไม่จ่าย</span>`)
         :`<span class="pill p-nil">🚌 รอประกาศราคาเดินทาง</span>`)
       :``;
-    const payBtns=(canPayTicket||canPayTravel)?`
-      <div style="display:flex;gap:.4rem;margin-top:.55rem;flex-wrap:wrap">
-        ${canPayTicket?`<button class="btn-pay" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">📱 สแกน QR จ่ายค่าบัตร ${b.ticket_price.toLocaleString()} ฿</button>`:''}
-        ${canPayTravel?`<button class="btn-pay btn-pay-trv" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">📱 สแกน QR จ่ายค่าเดินทาง ${b.travel_price.toLocaleString()} ฿</button>`:''}
-      </div>`:'';
-    return `<div class="bcard">
-      <div class="btop">
-        <div class="av" style="font-size:.85rem;font-weight:700">${b.tickets}</div>
-        <div class="ci">
-          <div class="cn">${esc2(b.name)}</div>
-          <div class="cm">🎫 ${b.tickets} ใบ${b.position?' · '+esc2(b.position):''} · ${fmtDate(b.created_at)}</div>
-        </div>
-        <div class="pr">
-          <div class="pp">${b.ticket_price.toLocaleString()} ฿</div>
-          ${b.travel&&b.travel_price>0?`<div class="ps">+${b.travel_price.toLocaleString()} ฿ เดินทาง</div>`:''}
-        </div>
-      </div>
-      <div class="bpills">${tp2}${trp}</div>
-      ${payBtns}
-    </div>`;
+    const payBtns=(canPayTicket||canPayTravel)?`<div style="display:flex;gap:.4rem;margin-top:.55rem;flex-wrap:wrap">${canPayTicket?`<button class="btn-pay" onclick="showQR2(${b.id},'t')">📱 สแกน QR จ่ายค่าบัตร ${b.ticket_price.toLocaleString()} ฿</button>`:''}${canPayTravel?`<button class="btn-pay btn-pay-trv" onclick="showQR2(${b.id},'tr')">📱 สแกน QR จ่ายค่าเดินทาง ${b.travel_price.toLocaleString()} ฿</button>`:''}</div>`:'';
+    return `<div class="bcard"><div class="btop"><div class="av" style="font-size:.85rem;font-weight:700">${b.tickets}</div><div class="ci"><div class="cn">${esc2(b.name)}</div><div class="cm">🎫 ${b.tickets} ใบ${b.position?' · '+esc2(b.position):''} · ${fmtDate(b.created_at)}</div></div><div class="pr"><div class="pp">${b.ticket_price.toLocaleString()} ฿</div>${b.travel&&b.travel_price>0?`<div class="ps">+${b.travel_price.toLocaleString()} ฿ เดินทาง</div>`:''}</div></div><div class="bpills">${tp2}${trp}</div>${payBtns}</div>`;
   }).join('');
+}
+function showQR2(id,type){
+  const b=_pd[id]; if(!b) return;
+  if(type==='t') showQR(b.name,b.ticket_price,'ค่าบัตร');
+  else showQR(b.name,b.travel_price,'ค่าเดินทาง');
 }
 
 /* QR */
@@ -794,7 +783,12 @@ function renderAdm(){
   const q=(document.getElementById('adm-search')||{}).value||'';
   const filtered=q?admData.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())||(b.position||'').toLowerCase().includes(q.toLowerCase())):admData;
   if(!filtered.length){el.innerHTML='<div class="empty">'+(q?'ไม่พบรายชื่อที่ค้นหา':'ไม่มีรายการ')+'</div>';return;}
-  el.innerHTML=filtered.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'จ่ายแล้ว ✓':'ยังไม่จ่าย ✗'}</span>${b.travel?`<span class="pill ${b.travel_price>0?(b.paid_travel?'p-trv':'p-no'):'p-no'}" style="font-size:.66rem">${b.travel_price>0?(b.paid_travel?'ร่วมเดิน ✓':'ร่วมเดิน ✗'):'รอประกาศราคา'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ จ่ายค่าบัตรแล้ว':'⬜ ยังไม่จ่ายค่าบัตร'}</button>${b.travel&&b.travel_price>0?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ จ่ายค่าเดินทางแล้ว':'⬜ ยังไม่จ่ายค่าเดินทาง'}</button>`:b.travel?`<span style="font-size:.72rem;color:var(--muted);padding:.2rem .4rem">⏳ ยังไม่ประกาศราคาเดินทาง</span>`:''}<button class="bxs" onclick="showQR(${esc(b.name)},${b.ticket_price},'ค่าบัตร')">📱 สแกนจ่ายค่าบัตร</button>${b.travel&&b.travel_price>0?`<button class="bxs" onclick="showQR(${esc(b.name)},${b.travel_price},'ค่าเดินทาง')">📱 สแกนจ่ายค่าเดินทาง</button>`:''}<button class="bxs" onclick="openEdit(${b.id},${esc(b.name)},${esc(b.position||'')},${b.tickets},${b.travel})">✏️</button><button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
+  filtered.forEach(b=>{_pd[b.id]=b;});
+  el.innerHTML=filtered.map(b=>`<div class="acard"><div class="ac-top"><div><div class="ac-name">${esc2(b.name)}</div>${b.position?`<div class="ac-det">🏷️ ${esc2(b.position)}</div>`:''}<div class="ac-det">💰 ค่าบัตร ${b.ticket_price.toLocaleString()} บาท${b.travel?' · 🚌 ค่าเดินทาง '+b.travel_price.toLocaleString()+' บาท':''}</div></div><div style="display:flex;flex-direction:column;gap:.26rem;align-items:flex-end"><span class="pill ${b.paid_ticket?'p-ok':'p-no'}" style="font-size:.66rem">${b.paid_ticket?'จ่ายแล้ว ✓':'ยังไม่จ่าย ✗'}</span>${b.travel?`<span class="pill ${b.travel_price>0?(b.paid_travel?'p-trv':'p-no'):'p-no'}" style="font-size:.66rem">${b.travel_price>0?(b.paid_travel?'ร่วมเดิน ✓':'ร่วมเดิน ✗'):'รอประกาศราคา'}</span>`:''}</div></div><div class="ac-btns"><button class="bxs ${b.paid_ticket?'ton':'toff'}" onclick="tog(${b.id},'paid_ticket',${b.paid_ticket})">${b.paid_ticket?'✅ จ่ายค่าบัตรแล้ว':'⬜ ยังไม่จ่ายค่าบัตร'}</button>${b.travel&&b.travel_price>0?`<button class="bxs ${b.paid_travel?'ton':'toff'}" onclick="tog(${b.id},'paid_travel',${b.paid_travel})">${b.paid_travel?'✅ จ่ายค่าเดินทางแล้ว':'⬜ ยังไม่จ่ายค่าเดินทาง'}</button>`:b.travel?`<span style="font-size:.72rem;color:var(--muted);padding:.2rem .4rem">⏳ ยังไม่ประกาศราคาเดินทาง</span>`:''}<button class="bxs" onclick="showQR2(${b.id},'t')">📱 สแกนจ่ายค่าบัตร</button>${b.travel&&b.travel_price>0?`<button class="bxs" onclick="showQR2(${b.id},'tr')">📱 สแกนจ่ายค่าเดินทาง</button>`:''}<button class="bxs" onclick="openEdit2(${b.id})">✏️</button><button class="bxs del" onclick="delB(${b.id})">🗑</button></div></div>`).join('');
+}
+function openEdit2(id){
+  const b=_pd[id]; if(!b) return;
+  openEdit(b.id,b.name,b.position||'',b.tickets,b.travel);
 }
 function openEdit(id,name,pos,tickets,travel){
   document.getElementById('edit-id').value=id;
