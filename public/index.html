@@ -931,7 +931,7 @@ async function admAdd(){
 
 function fmtDate(dt){return new Date(dt).toLocaleDateString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
 
-async function downloadPDF(){
+function downloadPDF(){
   const sorted=[...pubData].sort((a,b)=>a.name.localeCompare(b.name,'th'));
   const total=sorted.length;
   const totalTickets=sorted.reduce((s,b)=>s+(+b.tickets||1),0);
@@ -940,79 +940,91 @@ async function downloadPDF(){
   const travelPeople=sorted.filter(b=>b.travel).reduce((s,b)=>s+(+b.travel_count||1),0);
   const revenue=sorted.filter(b=>b.paid_ticket).reduce((s,b)=>s+(+b.ticket_price||0),0);
 
-  const thStyle='padding:9px 7px;text-align:left;border-bottom:2px solid #1a2a4a;font-size:12px;white-space:nowrap;';
-  const thC='padding:9px 7px;text-align:center;border-bottom:2px solid #1a2a4a;font-size:12px;white-space:nowrap;';
-  const thR='padding:9px 7px;text-align:right;border-bottom:2px solid #1a2a4a;font-size:12px;white-space:nowrap;';
-
   const rows=sorted.map((b,i)=>{
     const bg=i%2===0?'#f7f9fc':'#ffffff';
     const statusColor=b.paid_ticket?'#16a34a':'#dc2626';
     const statusBg=b.paid_ticket?'#dcfce7':'#fee2e2';
     const travelTxt=b.travel?(b.travel_count||1)+' คน':'-';
     return `<tr style="background:${bg}">
-      <td style="padding:7px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #e5e7eb">${i+1}</td>
-      <td style="padding:7px;font-size:13px;font-weight:600;border-bottom:1px solid #e5e7eb">${b.name}</td>
-      <td style="padding:7px;font-size:12px;color:#4b5563;border-bottom:1px solid #e5e7eb">${b.position||'-'}</td>
-      <td style="padding:7px;text-align:center;font-size:13px;font-weight:700;border-bottom:1px solid #e5e7eb">${b.tickets}</td>
-      <td style="padding:7px;text-align:center;font-size:12px;border-bottom:1px solid #e5e7eb">${travelTxt}</td>
-      <td style="padding:7px;text-align:center;border-bottom:1px solid #e5e7eb"><span style="background:${statusBg};color:${statusColor};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${b.paid_ticket?'จ่ายแล้ว':'ยังไม่จ่าย'}</span></td>
-      <td style="padding:7px;text-align:right;font-size:13px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #e5e7eb">${(+b.ticket_price||0).toLocaleString()} ฿</td>
+      <td style="padding:7px 6px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #e5e7eb">${i+1}</td>
+      <td style="padding:7px 6px;font-size:13px;font-weight:600;border-bottom:1px solid #e5e7eb">${b.name}</td>
+      <td style="padding:7px 6px;font-size:12px;color:#4b5563;border-bottom:1px solid #e5e7eb">${b.position||'-'}</td>
+      <td style="padding:7px 6px;text-align:center;font-weight:700;border-bottom:1px solid #e5e7eb">${b.tickets}</td>
+      <td style="padding:7px 6px;text-align:center;font-size:12px;border-bottom:1px solid #e5e7eb">${travelTxt}</td>
+      <td style="padding:7px 6px;text-align:center;border-bottom:1px solid #e5e7eb"><span style="background:${statusBg};color:${statusColor};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${b.paid_ticket?'จ่ายแล้ว':'ยังไม่จ่าย'}</span></td>
+      <td style="padding:7px 6px;text-align:right;font-weight:600;color:#1e3a5f;border-bottom:1px solid #e5e7eb">${(+b.ticket_price||0).toLocaleString()} ฿</td>
     </tr>`;
   }).join('');
 
-  const el=document.createElement('div');
-  el.innerHTML=`
-    <div style="font-family:'Sarabun','TH Sarabun New',Arial,sans-serif;padding:24px 20px;background:#fff;color:#111">
-      <div style="text-align:center;margin-bottom:6px">
-        <div style="font-size:22px;font-weight:800;color:#1a2a4a;letter-spacing:.5px">วันแห่งเกียรติยศ 2569</div>
-        <div style="font-size:14px;color:#555;margin-top:3px">บมจ.ไทยประกันชีวิต · ฝ่ายขยายงานภูมิภาค 4</div>
-        <div style="font-size:11px;color:#999;margin-top:2px">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})}</div>
-      </div>
-      <div style="height:2px;background:linear-gradient(90deg,#1a2a4a,#4a7aff,#1a2a4a);margin:12px 0 16px;border-radius:2px"></div>
-      <div style="display:flex;gap:10px;margin-bottom:18px;justify-content:center">
-        <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px 18px;border-radius:10px;text-align:center;min-width:80px"><div style="font-size:22px;font-weight:800;color:#1d4ed8">${total}</div><div style="font-size:11px;color:#555">คนทั้งหมด</div></div>
-        <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px 18px;border-radius:10px;text-align:center;min-width:80px"><div style="font-size:22px;font-weight:800;color:#7c3aed">${totalTickets}</div><div style="font-size:11px;color:#555">บัตรรวม</div></div>
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:10px 18px;border-radius:10px;text-align:center;min-width:80px"><div style="font-size:22px;font-weight:800;color:#16a34a">${paid}</div><div style="font-size:11px;color:#555">จ่ายแล้ว</div></div>
-        <div style="background:#fef2f2;border:1px solid #fecaca;padding:10px 18px;border-radius:10px;text-align:center;min-width:80px"><div style="font-size:22px;font-weight:800;color:#dc2626">${unpaid}</div><div style="font-size:11px;color:#555">ยังไม่จ่าย</div></div>
-        <div style="background:#fff7ed;border:1px solid #fed7aa;padding:10px 18px;border-radius:10px;text-align:center;min-width:80px"><div style="font-size:22px;font-weight:800;color:#ea580c">${travelPeople}</div><div style="font-size:11px;color:#555">ร่วมเดินทาง</div></div>
-      </div>
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="background:#1a2a4a;color:#fff">
-            <th style="${thC}width:28px">#</th>
-            <th style="${thStyle}">ชื่อ-นามสกุล</th>
-            <th style="${thStyle}">ตำแหน่ง</th>
-            <th style="${thC}width:40px">บัตร</th>
-            <th style="${thC}width:55px">เดินทาง</th>
-            <th style="${thC}width:80px">สถานะ</th>
-            <th style="${thR}width:75px">ยอด</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-        <tfoot>
-          <tr style="background:#1a2a4a;color:#fff">
-            <td colspan="3" style="padding:9px 7px;font-size:13px;font-weight:700">รวมทั้งหมด ${total} คน</td>
-            <td style="padding:9px 7px;text-align:center;font-size:13px;font-weight:700">${totalTickets}</td>
-            <td style="padding:9px 7px;text-align:center;font-size:13px;font-weight:700">${travelPeople}</td>
-            <td style="padding:9px 7px;text-align:center;font-size:13px;color:#86efac">${paid}/${total}</td>
-            <td style="padding:9px 7px;text-align:right;font-size:13px;font-weight:700">${revenue.toLocaleString()} ฿</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>`;
-  // ใส่ใน DOM จริงก่อนเพื่อให้ browser โหลด font
-  el.style.cssText='position:fixed;left:-9999px;top:0;z-index:-1';
-  document.body.appendChild(el);
-  // รอ font โหลดเสร็จ
-  await document.fonts.load('700 16px Sarabun');
-  await document.fonts.ready;
-  html2pdf().set({
-    margin:[8,8,8,8],
-    filename:`รายชื่อวันเกียรติยศ_${new Date().toLocaleDateString('th-TH')}.pdf`,
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,logging:false,allowTaint:true},
-    jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
-  }).from(el).save().then(()=>document.body.removeChild(el));
+  const dateStr=new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+  const w=window.open('','_blank','width=1100,height=800');
+  w.document.write(`<!DOCTYPE html><html lang="th"><head>
+    <meta charset="UTF-8">
+    <title>รายชื่อวันเกียรติยศ 2569</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'Sarabun',sans-serif;background:#fff;color:#111;padding:24px 20px}
+      h1{font-size:22px;font-weight:800;color:#1a2a4a;text-align:center;margin-bottom:3px}
+      .sub{text-align:center;color:#555;font-size:14px;margin-bottom:2px}
+      .date{text-align:center;color:#999;font-size:11px;margin-bottom:12px}
+      .divider{height:2px;background:linear-gradient(90deg,#1a2a4a,#4a7aff,#1a2a4a);margin:10px 0 14px;border-radius:2px}
+      .stats{display:flex;gap:10px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+      .stat{border:1px solid;padding:8px 16px;border-radius:10px;text-align:center;min-width:80px}
+      .stat .n{font-size:22px;font-weight:800}
+      .stat .l{font-size:11px;color:#555;margin-top:2px}
+      .s1{background:#eff6ff;border-color:#bfdbfe}.s1 .n{color:#1d4ed8}
+      .s2{background:#eff6ff;border-color:#c4b5fd}.s2 .n{color:#7c3aed}
+      .s3{background:#f0fdf4;border-color:#bbf7d0}.s3 .n{color:#16a34a}
+      .s4{background:#fef2f2;border-color:#fecaca}.s4 .n{color:#dc2626}
+      .s5{background:#fff7ed;border-color:#fed7aa}.s5 .n{color:#ea580c}
+      table{width:100%;border-collapse:collapse;font-size:13px}
+      thead tr{background:#1a2a4a;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      th{padding:8px 7px;font-weight:700}
+      tfoot tr{background:#1a2a4a;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      td{padding:7px 6px}
+      @media print{
+        body{padding:10px}
+        .no-print{display:none}
+        @page{size:A4 landscape;margin:10mm}
+      }
+    </style>
+  </head><body>
+    <h1>วันแห่งเกียรติยศ 2569</h1>
+    <div class="sub">บมจ.ไทยประกันชีวิต · ฝ่ายขยายงานภูมิภาค 4</div>
+    <div class="date">พิมพ์เมื่อ: ${dateStr}</div>
+    <div class="divider"></div>
+    <div class="stats">
+      <div class="stat s1"><div class="n">${total}</div><div class="l">คนทั้งหมด</div></div>
+      <div class="stat s2"><div class="n">${totalTickets}</div><div class="l">บัตรรวม</div></div>
+      <div class="stat s3"><div class="n">${paid}</div><div class="l">จ่ายแล้ว</div></div>
+      <div class="stat s4"><div class="n">${unpaid}</div><div class="l">ยังไม่จ่าย</div></div>
+      <div class="stat s5"><div class="n">${travelPeople}</div><div class="l">ร่วมเดินทาง</div></div>
+    </div>
+    <div class="no-print" style="text-align:center;margin-bottom:12px">
+      <button onclick="window.print()" style="background:#1a2a4a;color:#fff;border:none;padding:10px 32px;border-radius:8px;font-size:15px;font-family:Sarabun,sans-serif;cursor:pointer;font-weight:700">🖨️ พิมพ์ / บันทึก PDF</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:32px;text-align:center">#</th>
+        <th style="text-align:left">ชื่อ-นามสกุล</th>
+        <th style="text-align:left">ตำแหน่ง</th>
+        <th style="width:44px;text-align:center">บัตร</th>
+        <th style="width:60px;text-align:center">เดินทาง</th>
+        <th style="width:90px;text-align:center">สถานะ</th>
+        <th style="width:80px;text-align:right">ยอด</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="3" style="font-weight:700">รวมทั้งหมด ${total} คน</td>
+        <td style="text-align:center;font-weight:700">${totalTickets}</td>
+        <td style="text-align:center;font-weight:700">${travelPeople}</td>
+        <td style="text-align:center;color:#86efac;font-weight:700">${paid}/${total}</td>
+        <td style="text-align:right;font-weight:700">${revenue.toLocaleString()} ฿</td>
+      </tr></tfoot>
+    </table>
+  </body></html>`);
+  w.document.close();
 }
 function esc(s){return JSON.stringify(String(s));}
 function esc1(s){return(String(s).charAt(0)||'?').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
